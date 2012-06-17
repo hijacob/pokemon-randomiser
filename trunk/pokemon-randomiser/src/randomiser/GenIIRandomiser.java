@@ -199,13 +199,13 @@ public class GenIIRandomiser extends Randomiser {
 	
 	private void randomiseFishingAreas(int offset){
 		for(int i=offset; i<offset+FishingLength1; i+=3){
-			//rom[offset] - chance (cumulative)
-			rom[offset+1] = getReplacement(rom[offset+1]);
-			//rom[offset+2] - level
+			//rom[i] - chance (cumulative)
+			rom[i+1] = getReplacement(rom[i+1]);
+			//rom[i+2] - level
 		}
 		for(int i=offset+FishingLength1; i<offset+FishingLength1+FishingLength2; i+=2){
-			rom[offset] = getReplacement(rom[offset]);
-			//rom[offset+1] - level
+			rom[i] = getReplacement(rom[i]);
+			//rom[i+1] - level
 		}
 	}
 	
