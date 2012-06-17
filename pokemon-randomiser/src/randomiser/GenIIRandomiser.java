@@ -18,9 +18,18 @@ public class GenIIRandomiser extends Randomiser {
 	
 	final int GSTrainersStart = 0x399c9;
 	final int GSTrainersEnd = 0x3b684;
-	
 	final int CTrainersStart = 0x39a26;
 	final int CTrainersEnd = 0x3ba66;
+	
+	final int GSHeadbuttStart = 0xba47c;
+	final int GSHeadbuttEnd = 0xba4ee;
+	final int CHeadbuttStart = 0xb82fa;
+	final int CHeadbuttEnd = 0xb83e5;
+	
+	final int GSFishingOffset = 0x92A52;
+	final int CFishingOffset = 0x924e3;
+	final int FishingLength1 = 0x18C;
+	final int FishingLength2 = 0x58;
 	
 	Map<Byte,Byte> oneToOneMap;
 	Map<String,Byte> nameToIndex;
@@ -108,6 +117,14 @@ public class GenIIRandomiser extends Randomiser {
 				}
 				offset++;
 			}
+			int headbuttStart = game==version.Crystal ? CHeadbuttStart : GSHeadbuttStart;
+			int headbuttEnd = game==version.Crystal ? CHeadbuttEnd : GSHeadbuttEnd;
+			for(offset=headbuttStart; offset<headbuttEnd;){
+				offset = randomiseHBList(offset);
+			}
+			
+			offset = game==version.Crystal ? CFishingOffset : GSFishingOffset;
+			randomiseFishingAreas(offset);
 		}
 		
 		if(trainers){
@@ -168,6 +185,28 @@ public class GenIIRandomiser extends Randomiser {
 			offset += 2;
 		}
 		return offset;
+	}
+	
+	private int randomiseHBList(int offset){
+		while(rom[offset]!=(byte)(0xFF)){
+			//rom[offset] - chance (%)
+			rom[offset+1] = getReplacement(rom[offset+1]);
+			//rom[offset+2] - level
+			offset += 3;
+		}
+		return offset+1;
+	}
+	
+	private void randomiseFishingAreas(int offset){
+		for(int i=offset; i<offset+FishingLength1; i+=3){
+			//rom[offset] - chance (cumulative)
+			rom[offset+1] = getReplacement(rom[offset+1]);
+			//rom[offset+2] - level
+		}
+		for(int i=offset+FishingLength1; i<offset+FishingLength1+FishingLength2; i+=2){
+			rom[offset] = getReplacement(rom[offset]);
+			//rom[offset+1] - level
+		}
 	}
 	
 	private int randomiseTrainer(int offset){
