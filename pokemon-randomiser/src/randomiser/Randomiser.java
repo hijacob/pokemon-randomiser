@@ -125,6 +125,6 @@ public abstract class Randomiser {
 	}
 	
 	protected int readInt(int offset){
-		return readShort(offset) & 0xFFFF + ((readShort(offset+2) & 0xFFFF) << 16);
+		return (readShort(offset) & 0xFFFF) + ((readShort(offset+2) & 0xFFFF) << 16);
 	}
 }
