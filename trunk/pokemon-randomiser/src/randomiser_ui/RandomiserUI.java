@@ -203,7 +203,7 @@ public class RandomiserUI extends JFrame {
 				if(pathname.isDirectory())
 					return true;
 				String name = pathname.getName().toLowerCase();
-				if(name.endsWith(".gb") || name.endsWith(".gbc"))
+				if(name.endsWith(".gb") || name.endsWith(".gbc") || name.endsWith(".gba"))
 					return true;
 				return false;
 			}

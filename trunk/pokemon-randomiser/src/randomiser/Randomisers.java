@@ -16,6 +16,7 @@ public class Randomisers extends java.util.ArrayList<Randomiser> {
 	public Randomisers(){
 		super();
 		add(new GenIIRandomiser());
+		add(new GenIIIRandomiser());
 	}
 	
 	public version getVersion(String fileName) throws IOException{
@@ -38,6 +39,20 @@ public class Randomisers extends java.util.ArrayList<Randomiser> {
 			return version.Silver;
 		} else if(v1.startsWith("PM_CRYSTAL")){
 			return version.Crystal;
+		}
+		
+		String v2 = new String(Arrays.copyOfRange(header, 0xa0, 0xac));
+		
+		if(v2.startsWith("POKEMON RUBY")){
+			return version.Ruby;
+		} else if(v2.startsWith("POKEMON SAPP")){
+			return version.Sapphire;
+		} else if(v2.startsWith("POKEMON EMER")){
+			return version.Emerald;
+		} else if(v2.startsWith("POKEMON FIRE")){
+			return version.Fire;
+		} else if(v2.startsWith("POKEMON LEAF")){
+			return version.Leaf;
 		}
 		
 		return version.Unknown;

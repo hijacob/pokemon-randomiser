@@ -24,7 +24,7 @@ public abstract class Randomiser {
 	public enum version{Unknown,
 		Red,Blue,Yellow,
 		Gold,Silver,Crystal,
-		Ruby,Saffire,Emerald,
+		Ruby,Sapphire,Emerald,
 		Fire,Leaf,
 		Diamond,Pearl,Platinum,
 		Heart,Soul,
@@ -41,7 +41,7 @@ public abstract class Randomiser {
 		case Silver: return "Pokemon Silver";
 		case Crystal: return "Pokemon Crystal";
 		case Ruby: return "Pokemon Ruby";
-		case Saffire: return "Pokemon Saffire";
+		case Sapphire: return "Pokemon Sapphire";
 		case Emerald: return "Pokemon Emerald";
 		case Fire: return "Pokemon Fire Red";
 		case Leaf: return "Pokemon Leaf Green";
@@ -113,5 +113,18 @@ public abstract class Randomiser {
 	
 	public void setVersion(version v){
 		game = v;
+	}
+	
+	protected short readShort(int offset){
+		return (short) ((rom[offset]&0xFF) + ((rom[offset+1]&0xFF) << 8));
+	}
+	
+	protected void writeShort(int offset, short val){
+		rom[offset] = (byte)(val & 0xFF);
+		rom[offset+1] = (byte)((val & 0xFF00) >> 8);
+	}
+	
+	protected int readInt(int offset){
+		return readShort(offset) & 0xFFFF + ((readShort(offset+2) & 0xFFFF) << 16);
 	}
 }
