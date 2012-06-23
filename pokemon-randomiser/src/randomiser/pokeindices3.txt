@@ -198,7 +198,7 @@ c5	Umbreon
 c6	Murkrow
 c7	Slowking
 c8	Misdreavus
-c9	Unown A
+c9	Unown
 ca	Wobbuffet
 cb	Girafarig
 cc	Pineco
@@ -384,30 +384,3 @@ fb	Celebi
 199	Jirachi
 19a	Deoxys
 19b	Chimecho
-19d	Unown B
-19e	Unown C
-19f	Unown D
-1a0	Unown E
-1a1	Unown F
-1a2	Unown G
-1a3	Unown H
-1a4	Unown I
-1a5	Unown J
-1a6	Unown K
-1a7	Unown L
-1a8	Unown M
-1a9	Unown N
-1aa	Unown O
-1ab	Unown P
-1ac	Unown Q
-1ad	Unown R
-1ae	Unown S
-1af	Unown T
-1b0	Unown U
-1b1	Unown V
-1b2	Unown W
-1b3	Unown X
-1b4	Unown Y
-1b5	Unown Z
-1b6	Unown !
-1b7	Unown ?
