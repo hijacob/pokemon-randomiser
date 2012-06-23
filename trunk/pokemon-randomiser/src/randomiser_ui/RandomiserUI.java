@@ -25,7 +25,7 @@ public class RandomiserUI extends JFrame {
 
 	private static final long serialVersionUID = 3022055966117068412L;
 	
-	private static String version = "1.0b";
+	private static String version = "1.1";
 	
 	private static String aboutMessage =
 		String.format("Pokemon Randomiser %s\n",version) +
@@ -59,7 +59,7 @@ public class RandomiserUI extends JFrame {
 				aboutMessage += Randomiser.versionToString(v) + "\n";
 		
 		setSize(300,500);
-		setTitle("Pokemon GenII Randomiser");
+		setTitle("Pokemon Randomiser");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		JMenuBar menu = new JMenuBar();
