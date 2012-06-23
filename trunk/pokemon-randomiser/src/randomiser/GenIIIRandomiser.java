@@ -35,7 +35,7 @@ public class GenIIIRandomiser extends Randomiser {
 	Map<Short,Short> oneToOneMap;
 	Map<String,Short> nameToIndex;
 	String[] indexToName;
-	short[] pkmnindices;
+	ArrayList<Short> pkmnindices;
 	String[] pkmnnames;
 	
 	public GenIIIRandomiser(){
@@ -43,7 +43,7 @@ public class GenIIIRandomiser extends Randomiser {
 		oneToOneMap = new HashMap<Short,Short>();
 		nameToIndex = new HashMap<String,Short>();
 		indexToName = new String[0x200];
-		pkmnindices = new short[413];
+		pkmnindices = new ArrayList<Short>(413);
 		pkmnnames = new String[413];
 		loadNames();
 		ArrayList<Short> indices = new ArrayList<Short>(0x200);
@@ -73,7 +73,7 @@ public class GenIIIRandomiser extends Randomiser {
 				int index = Integer.parseInt(s[0], 16);
 				indexToName[index] = s[1];
 				nameToIndex.put(s[1], (short)index);
-				pkmnindices[i] = (short)index;
+				pkmnindices.add((short)index);
 				pkmnnames[i++] = s[1];
 			}
 			
@@ -173,14 +173,14 @@ public class GenIIIRandomiser extends Randomiser {
 	public short getReplacement(short pkmn){
 		switch(mode){
 		case Random:
-			return pkmnindices[rand.nextInt(pkmnindices.length)];
+			return pkmnindices.get(rand.nextInt(pkmnindices.size()));
 		case OneToOne:
 			return oneToOneMap.get(pkmn);
 		case Mew:
 			return nameToIndex.get("Mew");
 		default:
 			System.err.println("Unhandled randomisation mode");
-			return pkmnindices[rand.nextInt(pkmnindices.length)];
+			return pkmnindices.get(rand.nextInt(pkmnindices.size()));
 		}
 	}
 
