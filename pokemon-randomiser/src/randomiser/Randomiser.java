@@ -127,4 +127,14 @@ public abstract class Randomiser {
 	protected int readInt(int offset){
 		return (readShort(offset) & 0xFFFF) + ((readShort(offset+2) & 0xFFFF) << 16);
 	}
+	
+	public void SetUse649Mode(boolean value)
+	{
+		//Do nothing by default
+	}
+	
+	public boolean Supports649Mode()
+	{
+		return false;
+	}
 }
