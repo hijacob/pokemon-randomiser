@@ -85,7 +85,7 @@ public class GenIIIRandomiser extends Randomiser {
 	
 	private void loadNames(){
 		try {
-			BufferedReader r = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(UseGen5Pokemon ? "pokeindices5.txt" : "pokeindices3.txt")));
+			BufferedReader r = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(UseGen5Pokemon ? "pokeindices3-649.txt" : "pokeindices3.txt")));
 			int i=0;
 			while(true){
 				String line = r.readLine();
