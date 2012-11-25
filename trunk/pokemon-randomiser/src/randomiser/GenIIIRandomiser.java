@@ -37,16 +37,39 @@ public class GenIIIRandomiser extends Randomiser {
 	String[] indexToName;
 	ArrayList<Short> pkmnindices;
 	String[] pkmnnames;
+	boolean UseGen5Pokemon;
 	
 	public GenIIIRandomiser(){
 		super();
+		UseGen5Pokemon = false;
+		init();
+	}
+	
+	@Override
+	public void SetUse649Mode(boolean value)
+	{
+		if(UseGen5Pokemon != value)
+		{
+			UseGen5Pokemon = value;
+			init();
+		}
+	}
+	
+	@Override
+	public boolean Supports649Mode()
+	{
+		return true;
+	}
+	
+	private void init()
+	{
 		oneToOneMap = new HashMap<Short,Short>();
 		nameToIndex = new HashMap<String,Short>();
-		indexToName = new String[0x200];
-		pkmnindices = new ArrayList<Short>(413);
-		pkmnnames = new String[413];
+		indexToName = new String[0x500];
+		pkmnindices = new ArrayList<Short>(650);
+		pkmnnames = new String[650];
 		loadNames();
-		ArrayList<Short> indices = new ArrayList<Short>(0x200);
+		ArrayList<Short> indices = new ArrayList<Short>(0x500);
 		for(short i=0; i<indexToName.length; i++)
 			if(indexToName[i] != null){
 				indices.add(i);
@@ -58,12 +81,11 @@ public class GenIIIRandomiser extends Randomiser {
 			indices.remove(j);
 			oneToOneMap.put((short)i, replacement);
 		}
-		
 	}
 	
 	private void loadNames(){
 		try {
-			BufferedReader r = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("pokeindices3.txt")));
+			BufferedReader r = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(UseGen5Pokemon ? "pokeindices5.txt" : "pokeindices3.txt")));
 			int i=0;
 			while(true){
 				String line = r.readLine();
