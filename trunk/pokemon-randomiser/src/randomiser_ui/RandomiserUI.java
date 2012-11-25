@@ -25,7 +25,7 @@ public class RandomiserUI extends JFrame {
 
 	private static final long serialVersionUID = 3022055966117068412L;
 	
-	private static String version = "1.1";
+	private static String version = "1.2";
 	
 	private static String aboutMessage =
 		String.format("Pokemon Randomiser %s\n",version) +
@@ -264,12 +264,6 @@ public class RandomiserUI extends JFrame {
 					r.setVersion(v);
 					r.readRom(romPath);
 					loadNames();
-					String[] currentStarters = r.currentStarters();
-					if(currentStarters != null && currentStarters.length == 3){
-						s1.setSelectedItem(currentStarters[0]);
-						s2.setSelectedItem(currentStarters[1]);
-						s3.setSelectedItem(currentStarters[2]);
-					}
 					for(Component i: getContentPane().getComponents()){
 						i.setEnabled(true);
 						if(i.getClass() == new JPanel().getClass()){
@@ -308,6 +302,9 @@ public class RandomiserUI extends JFrame {
 	
 	private void loadNames()
 	{
+		s1.removeAllItems();
+		s2.removeAllItems();
+		s3.removeAllItems();
 		String[] names = r.getNames();
 		for(String name: names){
 			if(name!= null && !name.equals(""))
@@ -316,6 +313,13 @@ public class RandomiserUI extends JFrame {
 				s2.addItem(name);
 				s3.addItem(name);
 			}
+		}
+		
+		String[] currentStarters = r.currentStarters();
+		if(currentStarters != null && currentStarters.length == 3){
+			s1.setSelectedItem(currentStarters[0]);
+			s2.setSelectedItem(currentStarters[1]);
+			s3.setSelectedItem(currentStarters[2]);
 		}
 	}
 }
