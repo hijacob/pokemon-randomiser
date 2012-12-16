@@ -1,7 +1,8 @@
 package randomiser;
 
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import randomiser.Randomiser.version;
@@ -20,9 +21,9 @@ public class Randomisers extends java.util.ArrayList<Randomiser> {
 	}
 	
 	public version getVersion(String fileName) throws IOException{
-		char[] header = new char[400];
-		FileReader reader = new FileReader(fileName);
-		reader.read(header);
+		byte[] header = new byte[400];
+		InputStream reader = new FileInputStream(fileName);
+		reader.read(header, 0, 400);
 		reader.close();
 		
 		String v1 = new String(Arrays.copyOfRange(header,0x134,0x144));
