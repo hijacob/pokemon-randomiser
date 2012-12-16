@@ -65,21 +65,24 @@ public class GenIIIRandomiser extends Randomiser {
 	{
 		oneToOneMap = new HashMap<Short,Short>();
 		nameToIndex = new HashMap<String,Short>();
-		indexToName = new String[0x500];
+		indexToName = new String[650];
 		pkmnindices = new ArrayList<Short>(650);
 		pkmnnames = new String[650];
 		loadNames();
-		ArrayList<Short> indices = new ArrayList<Short>(0x500);
+		ArrayList<Short> tmpindices1 = new ArrayList<Short>(650);
+		ArrayList<Short> tmpindices2 = new ArrayList<Short>(650);
 		for(short i=0; i<indexToName.length; i++)
 			if(indexToName[i] != null){
-				indices.add(i);
+				tmpindices1.add(i);
+				tmpindices2.add(i);
 			}
 		
-		for(int i=0; !indices.isEmpty(); i++){
-			int j = rand.nextInt(indices.size());
-			short replacement = indices.get(j);
-			indices.remove(j);
-			oneToOneMap.put((short)i, replacement);
+		for(; !tmpindices1.isEmpty();){
+			int j = rand.nextInt(tmpindices1.size());
+			short replacement = tmpindices1.get(j);
+			tmpindices1.remove(j);
+			short index = tmpindices2.remove(0);
+			oneToOneMap.put(index, replacement);
 		}
 	}
 	
@@ -197,7 +200,16 @@ public class GenIIIRandomiser extends Randomiser {
 		case Random:
 			return pkmnindices.get(rand.nextInt(pkmnindices.size()));
 		case OneToOne:
-			return oneToOneMap.get(pkmn);
+			Short replacement =  oneToOneMap.get(pkmn);
+			if(replacement != null)
+			{
+				return replacement;
+			}
+			else
+			{
+				System.err.println("No replacement found for index " + (pkmn&0xFFFF));
+				return pkmnindices.get(rand.nextInt(pkmnindices.size()));
+			}
 		case Mew:
 			return nameToIndex.get("Mew");
 		default:

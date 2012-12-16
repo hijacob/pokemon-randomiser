@@ -41,14 +41,14 @@ public class GenIIRandomiser extends Randomiser {
 		nameToIndex = new HashMap<String,Byte>();
 		indexToName = new String[252];
 		loadNames();
-		ArrayList<Byte> indices = new ArrayList<Byte>(251);
+		ArrayList<Byte> tmpindices = new ArrayList<Byte>(251);
 		for(int i=0; i<251; i++)
-			indices.add(i,(byte)(i+1));
+			tmpindices.add(i,(byte)(i+1));
 		
-		for(int i=0; i<251; i++){
-			int j = rand.nextInt(indices.size());
-			byte replacement = indices.get(j);
-			indices.remove(j);
+		for(int i=1; i<=251; i++){
+			int j = rand.nextInt(tmpindices.size());
+			byte replacement = tmpindices.get(j);
+			tmpindices.remove(j);
 			oneToOneMap.put((byte)i, replacement);
 		}
 		
@@ -148,7 +148,16 @@ public class GenIIRandomiser extends Randomiser {
 			case Random:
 				return (byte) (rand.nextInt(251)+1);
 			case OneToOne:
-				return oneToOneMap.get(pkmn);
+				Byte replacement =  oneToOneMap.get(pkmn);
+				if(replacement != null)
+				{
+					return replacement;
+				}
+				else
+				{
+					System.err.println("No replacement found for index " + (pkmn&0xFF));
+					return (byte) (rand.nextInt(251)+1);
+				}
 			case Mew:
 				return (byte) 151;
 			default:
@@ -199,9 +208,12 @@ public class GenIIRandomiser extends Randomiser {
 	
 	private void randomiseFishingAreas(int offset){
 		for(int i=offset; i<offset+FishingLength1; i+=3){
-			//rom[i] - chance (cumulative)
-			rom[i+1] = getReplacement(rom[i+1]);
-			//rom[i+2] - level
+			if(rom[i+1] != 0) // index of 0 seems to have a special meaning here
+			{
+				//rom[i] - chance (cumulative)
+				rom[i+1] = getReplacement(rom[i+1]);
+				//rom[i+2] - level
+			}
 		}
 		for(int i=offset+FishingLength1; i<offset+FishingLength1+FishingLength2; i+=2){
 			rom[i] = getReplacement(rom[i]);
