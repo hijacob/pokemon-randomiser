@@ -252,7 +252,7 @@ public class GenIIIRandomiser extends Randomiser {
 				writeShort(offset+16*i+4, getReplacement(readShort(offset+16*i+4)));
 				//readShort(offset+16*i+6) - item
 				for(int j=0; j<4; j++)
-					if(movesets == movesetsMode.Random)
+					if(trainerMovesets == movesetsMode.Random)
 						writeShort(offset+16*i+2*j+8,(short)(rand.nextInt(0x162)+1));
 			}
 		else

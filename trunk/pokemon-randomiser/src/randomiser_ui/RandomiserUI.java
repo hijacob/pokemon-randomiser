@@ -33,7 +33,7 @@ public class RandomiserUI extends JFrame {
 		"Supported game versions:\n"; // Added at runtime
 	
 	private JButton randomise;
-	private JCheckBox randtrainers, randareas, Use649;
+	private JCheckBox randtrainers, randareas, randmovesets, randevolutions, randtms, Use649;
 
 	private JRadioButton randstarters, customstarters;
 	private JRadioButton onetoone, random;
@@ -58,7 +58,7 @@ public class RandomiserUI extends JFrame {
 			if(rlist.getRandomiser(v) != null)
 				aboutMessage += Randomiser.versionToString(v) + "\n";
 		
-		setSize(300,550);
+		setSize(500,400);
 		setTitle("Pokemon Randomiser");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
@@ -85,7 +85,8 @@ public class RandomiserUI extends JFrame {
 			}
 		});
 		
-		JPanel options = new JPanel();
+		JPanel starters = new JPanel(), trainers = new JPanel(), wild = new JPanel(), mode = new JPanel(), data = new JPanel(), misc = new JPanel();
+		
 		Use649 = new JCheckBox("649 Mode");
 		Use649.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
@@ -93,10 +94,20 @@ public class RandomiserUI extends JFrame {
 				loadNames();
 			};
 		});
-		options.add(Use649);
-		options.setLayout(new GridLayout());
+		Use649.setVisible(false);
 		
-		JPanel starters = new JPanel(), trainers = new JPanel(), wild = new JPanel(), mode = new JPanel();
+		randtms = new JCheckBox("Randomise TMs");
+		misc.add(randtms);
+		misc.add(Use649);
+		misc.setBorder(new TitledBorder(null, "Misc Options", TitledBorder.LEADING, TitledBorder.TOP));
+		misc.setLayout(new GridLayout(0,1));
+		
+		randevolutions = new JCheckBox("Randomise Evolutions");
+		randmovesets = new JCheckBox("Randomise Pokemon Movesets");
+		data.add(randevolutions);
+		data.add(randmovesets);
+		data.setBorder(new TitledBorder(null, "Pokemon Options", TitledBorder.LEADING, TitledBorder.TOP));
+		data.setLayout(new GridLayout(0,1));
 		
 		JRadioButton defaultStarters = new JRadioButton("Default Starters");
 		starters.add(defaultStarters);
@@ -161,10 +172,13 @@ public class RandomiserUI extends JFrame {
 				r.setStartersMode(smode);
 				r.randomiseTrainers(randtrainers.isSelected());
 				r.randomiseWildPokemon(randareas.isSelected());
+				r.setEvolutionsMode(randevolutions.isSelected());
+				r.setMovesetsMode(randmovesets.isSelected());
+				r.randomiseTMs(randtms.isSelected());
 				String[] starters = {s1.getSelectedItem().toString(), s2.getSelectedItem().toString(), s3.getSelectedItem().toString()};
 				r.customiseStarters(starters);
 				movesetsMode moves = unchangedmoves.isSelected() ? movesetsMode.Unchanged : movesetsMode.Random;
-				r.setMovesets(moves);
+				r.setTrainerMovesets(moves);
 				randomiseMode mode = onetoone.isSelected() ? randomiseMode.OneToOne : randomiseMode.Random;
 				r.setMode(mode);
 				r.randomise();
@@ -179,23 +193,30 @@ public class RandomiserUI extends JFrame {
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup()
-						.addComponent(options)
 						.addComponent(starters)
 						.addComponent(trainers)
-						.addComponent(wild)
-						.addComponent(mode)
 						.addComponent(randomise))
+					.addGroup(groupLayout.createParallelGroup()
+						.addComponent(data)
+						.addComponent(wild)
+						.addComponent(misc)
+						.addComponent(mode))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup()
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(options)
-					.addComponent(starters)
-					.addComponent(trainers)
-					.addComponent(wild)
-					.addComponent(mode)
+					.addGroup(groupLayout.createParallelGroup()
+							.addGroup(groupLayout.createSequentialGroup()
+									.addComponent(starters)
+									.addComponent(trainers))
+							.addGroup(groupLayout.createSequentialGroup()
+									.addComponent(data)
+									.addComponent(wild)
+									.addComponent(misc)
+									.addComponent(mode))
+							)
 					.addComponent(randomise)
 					.addContainerGap())
 		);
@@ -280,12 +301,13 @@ public class RandomiserUI extends JFrame {
 					
 					if(v == Randomiser.version.Fire)
 					{
-						Use649.setEnabled(true);
+						Use649.setVisible(true);
 					}
 					else
 					{
 						r.SetUse649Mode(false);
-						Use649.setEnabled(false);
+						Use649.setSelected(false);
+						Use649.setVisible(false);
 					}
 				}
 				else
