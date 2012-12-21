@@ -11,12 +11,12 @@ public abstract class Randomiser {
 
 	protected Random rand;
 	protected byte[] rom;
-	protected boolean wild, trainers;
+	protected boolean wild, trainers, movesets, evolutions, tms;
 	protected String[] customStarters;
 	protected randomiseMode mode;
 	protected version game;
 	protected startersMode starters;
-	protected movesetsMode movesets;
+	protected movesetsMode trainerMovesets;
 	
 	public enum randomiseMode{OneToOne, Random, Mew};
 	public enum startersMode{Default, Random, Custom};
@@ -58,11 +58,11 @@ public abstract class Randomiser {
 	
 	public Randomiser(){
 		rom = null;
-		wild = trainers = false;
+		wild = trainers = evolutions = movesets = tms = false;
 		customStarters = new String[0];
 		mode = randomiseMode.Random;
 		starters = startersMode.Default;
-		movesets = movesetsMode.Unchanged;
+		trainerMovesets = movesetsMode.Unchanged;
 		rand = new MersenneTwister(System.nanoTime());
 	}
 	
@@ -93,8 +93,20 @@ public abstract class Randomiser {
 		trainers = val;
 	}
 	
+	public void randomiseTMs(boolean val){
+		tms = val;
+	}
+	
 	public void setStartersMode(startersMode mode){
 		starters = mode;
+	}
+	
+	public void setMovesetsMode(boolean val){
+		movesets = val;
+	}
+	
+	public void setEvolutionsMode(boolean val){
+		evolutions = val;
 	}
 	
 	public void customiseStarters(String[] starters){
@@ -103,8 +115,8 @@ public abstract class Randomiser {
 	
 	public abstract String[] currentStarters();
 	
-	public void setMovesets(movesetsMode val){
-		movesets = val;
+	public void setTrainerMovesets(movesetsMode val){
+		trainerMovesets = val;
 	}
 	
 	public void setMode(randomiseMode val){

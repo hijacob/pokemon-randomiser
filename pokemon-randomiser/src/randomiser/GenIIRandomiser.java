@@ -31,6 +31,15 @@ public class GenIIRandomiser extends Randomiser {
 	final int FishingLength1 = 0x18C;
 	final int FishingLength2 = 0x58;
 	
+	final int GSPokemonDataOffset = 0x429B3;
+	final int CPokemonDataOffset = 0x427A7;
+	
+	final int GSTMsOffset = 0x11A66; //move index list
+	final int CTMsOffset = 0x1167A;
+	
+	final int GSPokemonStatsOffset = 0x51B0B; //see open text file
+	final int CPokemonStatsOffset = 0x51424;
+	
 	Map<Byte,Byte> oneToOneMap;
 	Map<String,Byte> nameToIndex;
 	String[] indexToName;
@@ -104,6 +113,18 @@ public class GenIIRandomiser extends Randomiser {
 			setStarter(offset+66, nameToIndex.get(customStarters[1]));
 			setStarter(offset+126, nameToIndex.get(customStarters[2]));
 		}
+		
+		if(evolutions || movesets){
+			randomisePokemonData(game==version.Crystal ? CPokemonDataOffset : GSPokemonDataOffset, evolutions, movesets);
+		}
+		
+		if(movesets){
+			randomisePokemonStats(game==version.Crystal ? CPokemonStatsOffset : GSPokemonStatsOffset, movesets);
+		}
+		
+		if(tms){
+			randomiseTMs(game==version.Crystal ? CTMsOffset : GSTMsOffset);
+		}
 
 		if(wild){
 			int offset = game==version.Crystal ? CWildOffset : GSWildOffset;
@@ -166,6 +187,9 @@ public class GenIIRandomiser extends Randomiser {
 		}
 	}
 	
+	private byte getRandomMove(){
+		return (byte) (rand.nextInt(251)+1);
+	}
 	
 	private void setStarter(int offset, byte replacement){
 		rom[offset] = replacement;
@@ -249,7 +273,7 @@ public class GenIIRandomiser extends Randomiser {
 					break;
 				//rom[offset+2+6*i] - level
 				rom[offset+3+6*i] = getReplacement(rom[offset+3+6*i]);
-				if(movesets == movesetsMode.Random){
+				if(trainerMovesets == movesetsMode.Random){
 					for(int j=1; j<=4; j++)
 						rom[offset+3+6*i+j] = (byte)(rand.nextInt(251)+1);
 				}
@@ -284,9 +308,9 @@ public class GenIIRandomiser extends Randomiser {
 				//rom[offset+2+7*i] - level
 				rom[offset+3+7*i] = getReplacement(rom[offset+3+7*i]);
 				//rom[offset+4+7*i] - item
-				if(movesets == movesetsMode.Random){
+				if(trainerMovesets == movesetsMode.Random){
 					for(int j=1; j<=4; j++)
-						rom[offset+4+7*i+j] = (byte)(rand.nextInt(251)+1);
+						rom[offset+4+7*i+j] = getRandomMove();
 				}
 			}
 			
@@ -301,6 +325,53 @@ public class GenIIRandomiser extends Randomiser {
 		}
 		
 		return offset;
+	}
+	
+	private void randomisePokemonData(int offset, boolean randomiseEvolutions, boolean randomiseMoves){
+		for(int i=0; i<251; i++){
+			while(rom[offset] != 0){
+				byte method = rom[offset++];
+				offset++; //level/item/etc.
+				if(method == 5){
+					offset++; // condition
+				}
+				if(randomiseEvolutions){
+					rom[offset] = getReplacement(rom[offset]);
+				}
+				offset++;
+			}
+			offset++;
+			while(rom[offset] != 0){
+				offset++; //level
+				if(randomiseMoves){
+					rom[offset] = getRandomMove();
+				}
+				//todo: remember the moves for each pokemon?
+				offset++;
+			}
+			offset++;
+		}
+	}
+	
+	private void randomisePokemonStats(int offset, boolean randomiseTMs) {
+		for(int i=0; i<251; i++) {
+			int pokemonOffset = offset + i*0x20;
+			int TMsField = pokemonOffset + 24;
+			
+			if(randomiseTMs){
+				for(int j=0; j<57/8; j++){
+					rom[TMsField+j] = (byte)rand.nextInt(256);
+				}
+				rom[TMsField+57/8] = (byte)rand.nextInt(2);
+			}
+			//todo: remember the tms for each pokemon?
+		}
+	}
+	
+	private void randomiseTMs(int offset){
+		for(int i=0; i<57; i++){
+			rom[offset+i] = getRandomMove();
+		}
 	}
 	
 	private void logTrainerFormatError(int offset){
