@@ -25,7 +25,7 @@ public class RandomiserUI extends JFrame {
 
 	private static final long serialVersionUID = 3022055966117068412L;
 	
-	private static String version = "1.2";
+	private static String version = "1.3";
 	
 	private static String aboutMessage =
 		String.format("Pokemon Randomiser %s\n",version) +
@@ -33,7 +33,7 @@ public class RandomiserUI extends JFrame {
 		"Supported game versions:\n"; // Added at runtime
 	
 	private JButton randomise;
-	private JCheckBox randtrainers, randareas, randmovesets, randevolutions, randtms, Use649;
+	private JCheckBox randtrainers, randareas, randmovesets, randtmcompatibility, randevolutions, randtms, Use649;
 
 	private JRadioButton randstarters, customstarters;
 	private JRadioButton onetoone, random;
@@ -104,8 +104,10 @@ public class RandomiserUI extends JFrame {
 		
 		randevolutions = new JCheckBox("Randomise Evolutions");
 		randmovesets = new JCheckBox("Randomise Pokemon Movesets");
-		data.add(randevolutions);
+		randtmcompatibility = new JCheckBox("Randomise TM Compatibility");
+		//data.add(randevolutions); //@todo: determine the effects of this
 		data.add(randmovesets);
+		data.add(randtmcompatibility);
 		data.setBorder(new TitledBorder(null, "Pokemon Options", TitledBorder.LEADING, TitledBorder.TOP));
 		data.setLayout(new GridLayout(0,1));
 		
@@ -173,6 +175,7 @@ public class RandomiserUI extends JFrame {
 				r.randomiseTrainers(randtrainers.isSelected());
 				r.randomiseWildPokemon(randareas.isSelected());
 				r.setEvolutionsMode(randevolutions.isSelected());
+				r.randomiseTMCompatibility(randtmcompatibility.isSelected());
 				r.setMovesetsMode(randmovesets.isSelected());
 				r.randomiseTMs(randtms.isSelected());
 				String[] starters = {s1.getSelectedItem().toString(), s2.getSelectedItem().toString(), s3.getSelectedItem().toString()};

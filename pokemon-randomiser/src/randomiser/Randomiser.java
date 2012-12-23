@@ -11,7 +11,7 @@ public abstract class Randomiser {
 
 	protected Random rand;
 	protected byte[] rom;
-	protected boolean wild, trainers, movesets, evolutions, tms;
+	protected boolean wild, trainers, movesets, tmcompatibility, evolutions, tms;
 	protected String[] customStarters;
 	protected randomiseMode mode;
 	protected version game;
@@ -28,7 +28,8 @@ public abstract class Randomiser {
 		Fire,Leaf,
 		Diamond,Pearl,Platinum,
 		Heart,Soul,
-		Black,White
+		Black,White,
+		Black2,White2
 	};
 	
 	public static String versionToString(version v){
@@ -52,13 +53,15 @@ public abstract class Randomiser {
 		case Soul: return "Pokemon Soul Silver";
 		case Black: return "Pokemon Black";
 		case White: return "Pokemon White";
+		case Black2: return "Pokemon Black 2";
+		case White2: return "Pokemon White 2";
 		default: return "Corrupt version enum value";
 		}
 	}
 	
 	public Randomiser(){
 		rom = null;
-		wild = trainers = evolutions = movesets = tms = false;
+		wild = trainers = evolutions = movesets = tmcompatibility = tms = false;
 		customStarters = new String[0];
 		mode = randomiseMode.Random;
 		starters = startersMode.Default;
@@ -107,6 +110,10 @@ public abstract class Randomiser {
 	
 	public void setEvolutionsMode(boolean val){
 		evolutions = val;
+	}
+	
+	public void randomiseTMCompatibility(boolean val){
+		tmcompatibility = val;
 	}
 	
 	public void customiseStarters(String[] starters){

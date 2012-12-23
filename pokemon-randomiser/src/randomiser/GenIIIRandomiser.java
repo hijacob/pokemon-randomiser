@@ -32,6 +32,25 @@ public class GenIIIRandomiser extends Randomiser {
 	private final int LTrainersStart = 0x23EACC;
 	private final int LTrainersEnd = 0x245EBB;
 	
+	private final int RPokemonMovesOffset = 0x201928;
+	private final int SPokemonMovesOffset = 0x2018B8;
+	private final int EPokemonMovesOffset = 0x3230DC;
+	private final int FPokemonMovesOffset = 0x257494;
+	private final int LPokemonMovesOffset = 0x257470;
+	
+	private final int RTMCompatibilityOffset = 0x1FD0F8;
+	private final int STMCompatibilityOffset = 0x1FD088;
+	private final int ETMCompatibilityOffset = 0x31E8A0;
+	private final int FTMCompatibilityOffset = 0x252BD0;
+	private final int F649TMCompatibilityOffset = 0x73ECF4;
+	private final int LTMCompatibilityOffset = 0x252BAC;
+	
+	private final int RTMsOffset = 0x376504;
+	private final int STMsOffset = 0x376494;
+	private final int ETMsOffset = 0x616040;
+	private final int FTMsOffset = 0x45A5A4;
+	private final int LTMsOffset = 0x459FC4;
+	
 	Map<Short,Short> oneToOneMap;
 	Map<String,Short> nameToIndex;
 	String[] indexToName;
@@ -150,6 +169,61 @@ public class GenIIIRandomiser extends Randomiser {
 			}
 		}
 		
+		if(movesets){
+			int offset;
+			if(game==version.Ruby){
+				offset = RPokemonMovesOffset;
+			} else if(game==version.Sapphire){
+				offset = SPokemonMovesOffset;
+			} else if(game==version.Emerald){
+				offset = EPokemonMovesOffset;
+			} else if(game==version.Fire){
+				offset = FPokemonMovesOffset;
+			} else {
+				offset = LPokemonMovesOffset;
+			}
+			
+			randomisePokemonMoves(offset);
+		}
+		
+		if(tmcompatibility)
+		{
+			int offset;
+			if(game==version.Ruby){
+				offset = RTMCompatibilityOffset;
+			} else if(game==version.Sapphire){
+				offset = STMCompatibilityOffset;
+			} else if(game==version.Emerald){
+				offset = ETMCompatibilityOffset;
+			} else if(game==version.Fire){
+				if(UseGen5Pokemon)
+					offset = F649TMCompatibilityOffset;
+				else
+					offset = FTMCompatibilityOffset;
+			} else {
+				offset = LTMCompatibilityOffset;
+			}
+			
+			randomiseTMCompatibility(offset);
+		}
+		
+		if(tms){
+			int offset;
+			if(game==version.Ruby){
+				offset = RTMsOffset;
+			} else if(game==version.Sapphire){
+				offset = STMsOffset;
+			} else if(game==version.Emerald){
+				offset = ETMsOffset;
+			} else if(game==version.Fire){
+				offset = FTMsOffset;
+			} else {
+				offset = LTMsOffset;
+			}
+			
+			randomiseTMs(offset);
+		}
+		
 		if(wild){
 			int offset;
 			if(game==version.Ruby){
@@ -195,7 +269,7 @@ public class GenIIIRandomiser extends Randomiser {
 		}
 	}
 	
-	public short getReplacement(short pkmn){
+	private short getReplacement(short pkmn){
 		switch(mode){
 		case Random:
 			return pkmnindices.get(rand.nextInt(pkmnindices.size()));
@@ -217,8 +291,12 @@ public class GenIIIRandomiser extends Randomiser {
 			return pkmnindices.get(rand.nextInt(pkmnindices.size()));
 		}
 	}
+	
+	private short getRandomMove(){
+		return (short)(rand.nextInt(354)+1);
+	}
 
-	void randomiseWildArea(int offset){
+	private void randomiseWildArea(int offset){
 		int end = offset;
 		int start = readInt(offset+4) - 0x8000000;
 		for(int i=start; i<end; i+=4){
@@ -228,7 +306,7 @@ public class GenIIIRandomiser extends Randomiser {
 		}
 	}
 	
-	void randomiseTrainer(int offset){
+	private void randomiseTrainer(int offset){
 		int pkmnformat = rom[offset]; //format&1 = moves, format&2 = items
 		// rom[offset+1] - trainer class
 		// rom[offset+2] - gender, intro music
@@ -244,7 +322,7 @@ public class GenIIIRandomiser extends Randomiser {
 		randomiseTrainerPokemon(pkmnOffset, nPkmn, (pkmnformat&1)==1);
 	}
 	
-	void randomiseTrainerPokemon(int offset, int nPkmn, boolean moves){
+	private void randomiseTrainerPokemon(int offset, int nPkmn, boolean moves){
 		if(moves)
 			for(int i=0; i<nPkmn; i++){
 				//readShort(offset+16*i) - AI smarts
@@ -262,6 +340,36 @@ public class GenIIIRandomiser extends Randomiser {
 				writeShort(offset+8*i+4, getReplacement(readShort(offset+8*i+4)));
 				//readShort(offset+8*i+6) - item
 			}
+	}
+	
+	private void randomisePokemonMoves(int offset){
+		for(int i=0; i<pkmnindices.size(); ++i){
+			while(readShort(offset) != (short)(-1)){
+				short s = readShort(offset);
+				int level = s>>9;
+				short move = (short)(s%512);
+				move = getRandomMove();
+				s = (short)((level<<9) + move);
+				writeShort(offset, s);
+				offset += 2;
+			}
+			offset += 2;
+		}
+	}
+	
+	private void randomiseTMCompatibility(int offset){
+		for(int i=0; i<pkmnindices.size(); ++i){
+			for(int j=0; j<58/8; j++){
+				rom[offset++] = (byte)rand.nextInt(256);
+			}
+			rom[offset++] = (byte)rand.nextInt(4);
+		}
+	}
+	
+	private void randomiseTMs(int offset){
+		for(int i=0; i<50; ++i){
+			writeShort(offset+2*i, getRandomMove());
+		}
 	}
 	
 	@Override
