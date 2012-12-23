@@ -118,8 +118,8 @@ public class GenIIRandomiser extends Randomiser {
 			randomisePokemonData(game==version.Crystal ? CPokemonDataOffset : GSPokemonDataOffset, evolutions, movesets);
 		}
 		
-		if(movesets){
-			randomisePokemonStats(game==version.Crystal ? CPokemonStatsOffset : GSPokemonStatsOffset, movesets);
+		if(tmcompatibility){
+			randomisePokemonStats(game==version.Crystal ? CPokemonStatsOffset : GSPokemonStatsOffset, tmcompatibility);
 		}
 		
 		if(tms){
