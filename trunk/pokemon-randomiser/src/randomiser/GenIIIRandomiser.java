@@ -51,6 +51,9 @@ public class GenIIIRandomiser extends Randomiser {
 	private final int FTMsOffset = 0x45A5A4;
 	private final int LTMsOffset = 0x459FC4;
 	
+	private final int FLHackProtectionOffset = 0x1D3F0;
+	private final int EHackProtectionOffset = 0x45C74;
+	
 	Map<Short,Short> oneToOneMap;
 	Map<String,Short> nameToIndex;
 	String[] indexToName;
@@ -144,6 +147,14 @@ public class GenIIIRandomiser extends Randomiser {
 
 	@Override
 	public void randomise() {
+		
+		if(game==version.Emerald){
+			removeHackProtection(EHackProtectionOffset);
+		} else if(game==version.Fire || game==version.Leaf){
+			removeHackProtection(FLHackProtectionOffset);
+		}
+		
+		
 		if(starters != startersMode.Default){
 			int[] offsets;
 			if(game==version.Ruby){
@@ -266,6 +277,15 @@ public class GenIIIRandomiser extends Randomiser {
 			for(int offset = start; offset < end; offset += 40){
 				randomiseTrainer(offset);
 			}
+		}
+	}
+	
+	private void removeHackProtection(int offset){
+		for(int i=0; i<4; ++i){
+			rom[offset+i] = 0;
+		}
+		for(int i=0; i<4; ++i){
+			rom[offset+0x12+i] = 0;
 		}
 	}
 	
