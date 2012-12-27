@@ -48,8 +48,8 @@ public class GenIIIRandomiser extends Randomiser {
 	private final int RTMsOffset = 0x376504;
 	private final int STMsOffset = 0x376494;
 	private final int ETMsOffset = 0x616040;
-	private final int FTMsOffset = 0x45A5A4;
-	private final int LTMsOffset = 0x459FC4;
+	private final int FTMsOffset = 0x45A80C;
+	private final int LTMsOffset = 0x45A22C;
 	
 	private final int FLHackProtectionOffset = 0x1D3F0;
 	private final int EHackProtectionOffset = 0x45C74;
