@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class GenIIIRandomiser extends Randomiser {
 
@@ -32,12 +34,14 @@ public class GenIIIRandomiser extends Randomiser {
 	private final int LTrainersStart = 0x23EACC;
 	private final int LTrainersEnd = 0x245EBB;
 	
-	private final int RPokemonMovesOffset = 0x201928;
-	private final int SPokemonMovesOffset = 0x2018B8;
-	private final int EPokemonMovesOffset = 0x3230DC;
-	private final int FPokemonMovesOffset = 0x257494;
-	private final int LPokemonMovesOffset = 0x257470;
+	private final int RPokemonMovesOffset = 0x201928; //table = 207BC8
+	private final int SPokemonMovesOffset = 0x2018B8; //table = 207B58
+	private final int EPokemonMovesOffset = 0x3230DC; //table = 32937C
+	private final int FPokemonMovesOffset = 0x257494; //table = 25D7B4
+	private final int F649PokemonMovesOffset = 0x7498EA; //table = 726990
+	private final int LPokemonMovesOffset = 0x257470; //table = 25D794
 	
+	//8 bytes after pointer for pokemon 0 = offset
 	private final int RTMCompatibilityOffset = 0x1FD0F8;
 	private final int STMCompatibilityOffset = 0x1FD088;
 	private final int ETMCompatibilityOffset = 0x31E8A0;
@@ -49,7 +53,22 @@ public class GenIIIRandomiser extends Randomiser {
 	private final int STMsOffset = 0x376494;
 	private final int ETMsOffset = 0x616040;
 	private final int FTMsOffset = 0x45A80C;
+	private final int F649TMsOffset = 0x45A5A4;
 	private final int LTMsOffset = 0x45A22C;
+	
+	private final int RTMItemOffset = 0x3C8710;
+	private final int STMItemOffset = 0x3C8768;
+	private final int ETMItemOffset = 0x586B4C;
+	private final int FTMItemOffset = 0x3DE1D4;
+	private final int F649TMItemOffset = 0x74F274;
+	private final int LTMItemOffset = 0x3DE010;
+	
+	private final int RMoveDescriptionOffset = 0x3C09D8;
+	private final int SMoveDescriptionOffset = 0x3C0A30;
+	private final int EMoveDescriptionOffset = 0x61C524;
+	private final int FMoveDescriptionOffset = 0x4886E8;
+	private final int F649MoveDescriptionOffset = 0x746E28;
+	private final int LMoveDescriptionOffset = 0x487FC4;
 	
 	private final int FLHackProtectionOffset = 0x1D3F0;
 	private final int EHackProtectionOffset = 0x45C74;
@@ -189,7 +208,10 @@ public class GenIIIRandomiser extends Randomiser {
 			} else if(game==version.Emerald){
 				offset = EPokemonMovesOffset;
 			} else if(game==version.Fire){
-				offset = FPokemonMovesOffset;
+				if(UseGen5Pokemon)
+					offset = F649PokemonMovesOffset;
+				else
+					offset = FPokemonMovesOffset;
 			} else {
 				offset = LPokemonMovesOffset;
 			}
@@ -219,20 +241,36 @@ public class GenIIIRandomiser extends Randomiser {
 		}
 		
 		if(tms){
-			int offset;
+			int offset, TMItemOffset, MoveDescriptionTableOffset;
 			if(game==version.Ruby){
 				offset = RTMsOffset;
+				TMItemOffset = RTMItemOffset;
+				MoveDescriptionTableOffset = RMoveDescriptionOffset;
 			} else if(game==version.Sapphire){
 				offset = STMsOffset;
+				TMItemOffset = STMItemOffset;
+				MoveDescriptionTableOffset = SMoveDescriptionOffset;
 			} else if(game==version.Emerald){
 				offset = ETMsOffset;
+				TMItemOffset = ETMItemOffset;
+				MoveDescriptionTableOffset = EMoveDescriptionOffset;
 			} else if(game==version.Fire){
-				offset = FTMsOffset;
+				if(UseGen5Pokemon) {
+					offset = F649TMsOffset;
+					TMItemOffset = F649TMItemOffset;
+					MoveDescriptionTableOffset = F649MoveDescriptionOffset;
+				} else {
+					offset = FTMsOffset;
+					TMItemOffset = FTMItemOffset;
+					MoveDescriptionTableOffset = FMoveDescriptionOffset;
+				}
 			} else {
 				offset = LTMsOffset;
+				TMItemOffset = LTMItemOffset;
+				MoveDescriptionTableOffset = LMoveDescriptionOffset;
 			}
 			
-			randomiseTMs(offset);
+			randomiseTMs(offset, TMItemOffset, MoveDescriptionTableOffset);
 		}
 		
 		if(wild){
@@ -363,12 +401,16 @@ public class GenIIIRandomiser extends Randomiser {
 	}
 	
 	private void randomisePokemonMoves(int offset){
-		for(int i=0; i<pkmnindices.size(); ++i){
+		for(int i=0; i<pkmnindices.get(pkmnindices.size()-1); ++i){
+			Set<Short> moves = new HashSet<Short>();
 			while(readShort(offset) != (short)(-1)){
 				short s = readShort(offset);
 				int level = s>>9;
 				short move = (short)(s%512);
-				move = getRandomMove();
+				do{
+					move = getRandomMove();
+				} while(moves.contains(move));
+				moves.add(move);
 				s = (short)((level<<9) + move);
 				writeShort(offset, s);
 				offset += 2;
@@ -378,7 +420,7 @@ public class GenIIIRandomiser extends Randomiser {
 	}
 	
 	private void randomiseTMCompatibility(int offset){
-		for(int i=0; i<pkmnindices.size(); ++i){
+		for(int i=0; i<pkmnindices.get(pkmnindices.size()-1); ++i){
 			for(int j=0; j<58/8; j++){
 				rom[offset++] = (byte)rand.nextInt(256);
 			}
@@ -386,9 +428,17 @@ public class GenIIIRandomiser extends Randomiser {
 		}
 	}
 	
-	private void randomiseTMs(int offset){
+	private void randomiseTMs(int offset, int TMItemOffset, int MoveDescriptionTableOffset){
+		Set<Short> moves = new HashSet<Short>();
 		for(int i=0; i<50; ++i){
-			writeShort(offset+2*i, getRandomMove());
+			short move;
+			do{
+				move = getRandomMove();
+			} while(moves.contains(move));
+			writeShort(offset+2*i, move);
+			//tm offset = offset + (i-1)*44 //tm description pointer = tm offset + 20
+			//move i description pointer = offset + (i-1)*4
+			writeShort(TMItemOffset + i*44 + 20, readShort(MoveDescriptionTableOffset + (move-1)*4));
 		}
 	}
 	
