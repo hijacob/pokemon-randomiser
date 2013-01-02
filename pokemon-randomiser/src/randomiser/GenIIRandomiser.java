@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class GenIIRandomiser extends Randomiser {
 
@@ -341,10 +343,16 @@ public class GenIIRandomiser extends Randomiser {
 				offset++;
 			}
 			offset++;
+			Set<Byte> moveset = new HashSet<Byte>();
 			while(rom[offset] != 0){
 				offset++; //level
 				if(randomiseMoves){
-					rom[offset] = getRandomMove();
+					byte move;
+					do{
+						move = getRandomMove();
+					} while(moveset.contains(move));
+					rom[offset] = move;
+					moveset.add(move);
 				}
 				//todo: remember the moves for each pokemon?
 				offset++;
@@ -369,8 +377,14 @@ public class GenIIRandomiser extends Randomiser {
 	}
 	
 	private void randomiseTMs(int offset){
-		for(int i=0; i<57; i++){
-			rom[offset+i] = getRandomMove();
+		Set<Byte> moveset = new HashSet<Byte>();
+		for(int i=0; i<50; i++){
+			byte move;
+			do{
+				move = getRandomMove();
+			} while(moveset.contains(move));
+			rom[offset+i] = move;
+			moveset.add(move);
 		}
 	}
 	
