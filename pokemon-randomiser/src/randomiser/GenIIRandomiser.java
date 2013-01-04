@@ -285,7 +285,7 @@ public class GenIIRandomiser extends Randomiser {
 					for(int j=1; j<=4; j++)
 						rom[offset+3+6*i+j] = (byte)(rand.nextInt(251)+1);
 				} else if(trainerMovesets == movesetsMode.Default) {
-					List<LevelUpMove> moveset = readPokemonMoves(pkmn);
+					List<LevelUpMove> moveset = readPokemonMoves(pkmn & 0xFF);
 					Pokemon tmpPokemon = new Pokemon(pkmn);
 					tmpPokemon.levelupMoves = moveset;
 					List<Move> trainerMoves = tmpPokemon.getDefaultMoves(level);
@@ -331,15 +331,15 @@ public class GenIIRandomiser extends Randomiser {
 					for(int j=1; j<=4; j++)
 						rom[offset+4+7*i+j] = getRandomMove();
 				} else if(trainerMovesets == movesetsMode.Default){
-					List<LevelUpMove> moveset = readPokemonMoves(pkmn);
+					List<LevelUpMove> moveset = readPokemonMoves(pkmn & 0xFF);
 					Pokemon tmpPokemon = new Pokemon(pkmn);
 					tmpPokemon.levelupMoves = moveset;
 					List<Move> trainerMoves = tmpPokemon.getDefaultMoves(level);
 					for(int j=1; j<=4; j++)
 						if(j <= trainerMoves.size())
-							rom[offset+3+6*i+j] = (byte)trainerMoves.get(j-1).index;
+							rom[offset+4+7*i+j] = (byte)trainerMoves.get(j-1).index;
 						else
-							rom[offset+3+6*i+j] = 0;
+							rom[offset+4+7*i+j] = 0;
 				}
 			}
 			
@@ -455,8 +455,8 @@ public class GenIIRandomiser extends Randomiser {
 	}
 	
 	private int readPointer(int offset){
-		int memoryBank = offset % 4000;
-		int RAMpointer = readShort(offset);
-		return memoryBank * 4000 + RAMpointer-4000;
+		int memoryBank = offset / 0x4000;
+		int RAMpointer = readShort(offset) & 0xFFFF;
+		return memoryBank * 0x4000 + RAMpointer-0x4000;
 	}
 }

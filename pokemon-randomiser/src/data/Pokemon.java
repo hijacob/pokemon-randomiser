@@ -21,6 +21,9 @@ public class Pokemon {
 			}
 		}
 		
-		return moves.subList(moves.size()-4, moves.size());
+		if(moves.size() <= 4)
+			return moves;
+		else
+			return moves.subList(moves.size()-4, moves.size());
 	}
 }
