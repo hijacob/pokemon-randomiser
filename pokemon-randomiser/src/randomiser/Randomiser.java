@@ -20,7 +20,7 @@ public abstract class Randomiser {
 	
 	public enum randomiseMode{OneToOne, Random, Mew};
 	public enum startersMode{Default, Random, Custom};
-	public enum movesetsMode{Unchanged, Random};
+	public enum movesetsMode{Unchanged, Random, Default};
 	public enum version{Unknown,
 		Red,Blue,Yellow,
 		Gold,Silver,Crystal,
