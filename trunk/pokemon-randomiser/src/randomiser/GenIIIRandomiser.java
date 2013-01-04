@@ -6,8 +6,13 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import data.LevelUpMove;
+import data.Move;
+import data.Pokemon;
 
 public class GenIIIRandomiser extends Randomiser {
 
@@ -34,12 +39,12 @@ public class GenIIIRandomiser extends Randomiser {
 	private final int LTrainersStart = 0x23EACC;
 	private final int LTrainersEnd = 0x245EBB;
 	
-	private final int RPokemonMovesOffset = 0x201928; //table = 207BC8
-	private final int SPokemonMovesOffset = 0x2018B8; //table = 207B58
-	private final int EPokemonMovesOffset = 0x3230DC; //table = 32937C
-	private final int FPokemonMovesOffset = 0x257494; //table = 25D7B4
-	private final int F649PokemonMovesOffset = 0x7498EA; //table = 726990
-	private final int LPokemonMovesOffset = 0x257470; //table = 25D794
+	private final int RPokemonMovesOffset = 0x207BC8;
+	private final int SPokemonMovesOffset = 0x207B58;
+	private final int EPokemonMovesOffset = 0x32937C;
+	private final int FPokemonMovesOffset = 0x25D7B4;
+	private final int F649PokemonMovesOffset = 0x726990;
+	private final int LPokemonMovesOffset = 0x25D794;
 	
 	//8 bytes after pointer for pokemon 0 = offset
 	private final int RTMCompatibilityOffset = 0x1FD0F8;
@@ -69,6 +74,14 @@ public class GenIIIRandomiser extends Randomiser {
 	private final int FMoveDescriptionOffset = 0x4886E8;
 	private final int F649MoveDescriptionOffset = 0x746E28;
 	private final int LMoveDescriptionOffset = 0x487FC4;
+	
+	//Egg moves: pokemon + 0x4E20, mm, mm, mm, ..., pokemon + 0x4E20, ..., FFFF
+	private final int REggMovesOffset = 0x2091DC;
+	private final int SEggMovesOffset = 0x20916C;
+	private final int EEggMovesOffset = 0x32ADD8;
+	private final int FEggMovesOffset = 0x25EF0C; //214E71008200 //pointer = 45C50, C8
+//	private final int F649EggMovesOffset = NOT_IMPLEMENTED;
+	private final int LEggMovesOffset = 0x25EEEC;
 	
 	private final int FLHackProtectionOffset = 0x1D3F0;
 	private final int EHackProtectionOffset = 0x45C74;
@@ -384,12 +397,25 @@ public class GenIIIRandomiser extends Randomiser {
 		if(moves)
 			for(int i=0; i<nPkmn; i++){
 				//readShort(offset+16*i) - AI smarts
-				//readShort(offset+16*i+2) - level
-				writeShort(offset+16*i+4, getReplacement(readShort(offset+16*i+4)));
+				int level = readShort(offset+16*i+2);
+				short pkmn = getReplacement(readShort(offset+16*i+4));
+				writeShort(offset+16*i+4, pkmn);
 				//readShort(offset+16*i+6) - item
-				for(int j=0; j<4; j++)
-					if(trainerMovesets == movesetsMode.Random)
-						writeShort(offset+16*i+2*j+8,(short)(rand.nextInt(0x162)+1));
+				if(trainerMovesets == movesetsMode.Random)
+					for(int j=0; j<4; j++)
+						writeShort(offset+16*i+2*j+8, getRandomMove());
+				else if(trainerMovesets == movesetsMode.Default){
+					List<LevelUpMove> moveset = readPokemonMoves(pkmn);
+					Pokemon tmpPokemon = new Pokemon(pkmn);
+					tmpPokemon.levelupMoves = moveset;
+					List<Move> trainerMoves = tmpPokemon.getDefaultMoves(level);
+					
+					for(int j=0; j<4; j++)
+						if(j < trainerMoves.size())
+							writeShort(offset+16*i+2*j+8,(short) trainerMoves.get(j).index);
+						else
+							writeShort(offset+16*i+2*j+8, (short) 0);
+				}
 			}
 		else
 			for(int i=0; i<nPkmn; i++){
@@ -400,23 +426,60 @@ public class GenIIIRandomiser extends Randomiser {
 			}
 	}
 	
-	private void randomisePokemonMoves(int offset){
-		for(int i=0; i<pkmnindices.get(pkmnindices.size()-1); ++i){
+	private void randomisePokemonMoves(int tableOffset){
+		for(int i=1; i<=pkmnindices.get(pkmnindices.size()-1); ++i){
+			int offset = readPointer(tableOffset + 4*i);
 			Set<Short> moves = new HashSet<Short>();
+			if (UseGen5Pokemon) {
+				//@todo different format
+			} else {
+				while(readShort(offset) != (short)(-1)){
+					short s = readShort(offset);
+					int level = s>>9;
+					short move = (short)(s%512);
+					do{
+						move = getRandomMove();
+					} while(moves.contains(move));
+					moves.add(move);
+					s = (short)((level<<9) + move);
+					writeShort(offset, s);
+					offset += 2;
+				}
+			}
+		}
+	}
+	
+	protected List<LevelUpMove> readPokemonMoves(int pokemonIndex){
+		int tableOffset;
+		if(game==version.Ruby){
+			tableOffset = RPokemonMovesOffset;
+		} else if(game==version.Sapphire){
+			tableOffset = SPokemonMovesOffset;
+		} else if(game==version.Emerald){
+			tableOffset = EPokemonMovesOffset;
+		} else if(game==version.Fire){
+			if(UseGen5Pokemon)
+				tableOffset = F649PokemonMovesOffset;
+			else
+				tableOffset = FPokemonMovesOffset;
+		} else {
+			tableOffset = LPokemonMovesOffset;
+		}
+		int offset = readPointer(tableOffset + 4*pokemonIndex);
+		
+		List<LevelUpMove> moves = new ArrayList<LevelUpMove>();
+		if(UseGen5Pokemon){ //@todo
+			return null;
+		} else {
 			while(readShort(offset) != (short)(-1)){
 				short s = readShort(offset);
 				int level = s>>9;
-				short move = (short)(s%512);
-				do{
-					move = getRandomMove();
-				} while(moves.contains(move));
-				moves.add(move);
-				s = (short)((level<<9) + move);
-				writeShort(offset, s);
-				offset += 2;
+				int move = s%512;
+				moves.add(new LevelUpMove(level, move));
 			}
-			offset += 2;
 		}
+		
+		return moves;
 	}
 	
 	private void randomiseTMCompatibility(int offset){
@@ -473,4 +536,11 @@ public class GenIIIRandomiser extends Randomiser {
 		return null;
 	}
 
+	private int readPointer(int offset){
+		byte test = rom[offset+3];
+		if(test != 8){
+			return -1;
+		}
+		return readInt(offset) - 0x8000000;
+	}
 }

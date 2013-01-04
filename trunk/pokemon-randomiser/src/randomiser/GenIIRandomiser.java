@@ -7,8 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import data.LevelUpMove;
+import data.Move;
+import data.Pokemon;
 
 public class GenIIRandomiser extends Randomiser {
 
@@ -33,8 +38,8 @@ public class GenIIRandomiser extends Randomiser {
 	final int FishingLength1 = 0x18C;
 	final int FishingLength2 = 0x58;
 	
-	final int GSPokemonDataOffset = 0x429B3;
-	final int CPokemonDataOffset = 0x427A7;
+	final int GSPokemonDataOffset = 0x427BD;
+	final int CPokemonDataOffset = 0x425B1;
 	
 	final int GSTMsOffset = 0x11A66; //move index list
 	final int CTMsOffset = 0x1167A;
@@ -273,11 +278,22 @@ public class GenIIRandomiser extends Randomiser {
 			for(; i<6; i++){
 				if(rom[offset+2+6*i] == (byte)255)
 					break;
-				//rom[offset+2+6*i] - level
-				rom[offset+3+6*i] = getReplacement(rom[offset+3+6*i]);
+				int level = rom[offset+2+6*i];
+				byte pkmn = getReplacement(rom[offset+3+6*i]);
+				rom[offset+3+6*i] = pkmn;
 				if(trainerMovesets == movesetsMode.Random){
 					for(int j=1; j<=4; j++)
 						rom[offset+3+6*i+j] = (byte)(rand.nextInt(251)+1);
+				} else if(trainerMovesets == movesetsMode.Default) {
+					List<LevelUpMove> moveset = readPokemonMoves(pkmn);
+					Pokemon tmpPokemon = new Pokemon(pkmn);
+					tmpPokemon.levelupMoves = moveset;
+					List<Move> trainerMoves = tmpPokemon.getDefaultMoves(level);
+					for(int j=1; j<=4; j++)
+						if(j <= trainerMoves.size())
+							rom[offset+3+6*i+j] = (byte)trainerMoves.get(j-1).index;
+						else
+							rom[offset+3+6*i+j] = 0;
 				}
 				
 			}
@@ -307,12 +323,23 @@ public class GenIIRandomiser extends Randomiser {
 			for(; i<6; i++){
 				if(rom[offset+2+7*i] == (byte)255)
 					break;
-				//rom[offset+2+7*i] - level
-				rom[offset+3+7*i] = getReplacement(rom[offset+3+7*i]);
+				int level = rom[offset+2+7*i];
+				byte pkmn = getReplacement(rom[offset+3+7*i]);
+				rom[offset+3+7*i] = pkmn;
 				//rom[offset+4+7*i] - item
 				if(trainerMovesets == movesetsMode.Random){
 					for(int j=1; j<=4; j++)
 						rom[offset+4+7*i+j] = getRandomMove();
+				} else if(trainerMovesets == movesetsMode.Default){
+					List<LevelUpMove> moveset = readPokemonMoves(pkmn);
+					Pokemon tmpPokemon = new Pokemon(pkmn);
+					tmpPokemon.levelupMoves = moveset;
+					List<Move> trainerMoves = tmpPokemon.getDefaultMoves(level);
+					for(int j=1; j<=4; j++)
+						if(j <= trainerMoves.size())
+							rom[offset+3+6*i+j] = (byte)trainerMoves.get(j-1).index;
+						else
+							rom[offset+3+6*i+j] = 0;
 				}
 			}
 			
@@ -329,8 +356,9 @@ public class GenIIRandomiser extends Randomiser {
 		return offset;
 	}
 	
-	private void randomisePokemonData(int offset, boolean randomiseEvolutions, boolean randomiseMoves){
+	private void randomisePokemonData(int tableOffset, boolean randomiseEvolutions, boolean randomiseMoves){
 		for(int i=0; i<251; i++){
+			int offset = readPointer(tableOffset + i*2);
 			while(rom[offset] != 0){
 				byte method = rom[offset++];
 				offset++; //level/item/etc.
@@ -357,8 +385,28 @@ public class GenIIRandomiser extends Randomiser {
 				//todo: remember the moves for each pokemon?
 				offset++;
 			}
+		}
+	}
+	
+	protected List<LevelUpMove> readPokemonMoves(int pkmn){
+		List<LevelUpMove> moves = new ArrayList<LevelUpMove>();
+		int tableOffset = game==version.Crystal?CPokemonDataOffset:GSPokemonDataOffset;
+		int offset = readPointer(tableOffset + (pkmn-1)*2);
+		while(rom[offset] != 0){ //evolution data
+			byte method = rom[offset++];
+			offset++; //level/item/etc.
+			if(method == 5){
+				offset++; // condition
+			}
 			offset++;
 		}
+		offset++;
+		while(rom[offset] != 0){
+			byte level = rom[offset++];
+			byte index = rom[offset++];
+			moves.add(new LevelUpMove(level, index));
+		}
+		return moves;
 	}
 	
 	private void randomisePokemonStats(int offset, boolean randomiseTMs) {
@@ -404,5 +452,11 @@ public class GenIIRandomiser extends Randomiser {
 			return ret;
 		}
 		return null;
+	}
+	
+	private int readPointer(int offset){
+		int memoryBank = offset % 4000;
+		int RAMpointer = readShort(offset);
+		return memoryBank * 4000 + RAMpointer-4000;
 	}
 }
