@@ -37,7 +37,7 @@ public class RandomiserUI extends JFrame {
 
 	private JRadioButton randstarters, customstarters;
 	private JRadioButton onetoone, random;
-	private JRadioButton unchangedmoves, randommoves;
+	private JRadioButton unchangedmoves, randommoves, defaultmoves;
 	private JComboBox s1, s2, s3;
 	
 	Randomiser r;
@@ -140,12 +140,15 @@ public class RandomiserUI extends JFrame {
 		trainers.add(randtrainers);
 		unchangedmoves = new JRadioButton("Unchanged Movesets");
 		trainers.add(unchangedmoves);
+		defaultmoves = new JRadioButton("Default Movesets");
+		trainers.add(defaultmoves);
 		randommoves = new JRadioButton("Random Movesets");
 		trainers.add(randommoves);
 		ButtonGroup moves = new ButtonGroup();
 		moves.add(unchangedmoves);
+		moves.add(defaultmoves);
 		moves.add(randommoves);
-		unchangedmoves.setSelected(true);
+		defaultmoves.setSelected(true);
 		trainers.setBorder(new TitledBorder(null, "Trainers", TitledBorder.LEADING, TitledBorder.TOP));
 		trainers.setLayout(new GridLayout(0,1));
 		
@@ -180,7 +183,7 @@ public class RandomiserUI extends JFrame {
 				r.randomiseTMs(randtms.isSelected());
 				String[] starters = {s1.getSelectedItem().toString(), s2.getSelectedItem().toString(), s3.getSelectedItem().toString()};
 				r.customiseStarters(starters);
-				movesetsMode moves = unchangedmoves.isSelected() ? movesetsMode.Unchanged : movesetsMode.Random;
+				movesetsMode moves = unchangedmoves.isSelected() ? movesetsMode.Unchanged : defaultmoves.isSelected() ? movesetsMode.Default : movesetsMode.Random;
 				r.setTrainerMovesets(moves);
 				randomiseMode mode = onetoone.isSelected() ? randomiseMode.OneToOne : randomiseMode.Random;
 				r.setMode(mode);
