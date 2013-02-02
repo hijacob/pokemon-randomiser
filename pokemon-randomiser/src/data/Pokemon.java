@@ -12,14 +12,21 @@ public class Pokemon {
 		this.index = index;
 	}
 	
-	public List<Move> getDefaultMoves(int level){
+	public List<Move> getMoves(int level){
 		List<Move> moves = new ArrayList<Move>();
 		
 		for(LevelUpMove m : levelupMoves){
 			if(m.level <= level){
-				moves.add(m.move);
+				if(!moves.contains(m.move)) //some moves are listed twice in the standard movesets
+					moves.add(m.move);
 			}
 		}
+		
+		return moves;
+	}
+	
+	public List<Move> getDefaultMoves(int level){
+		List<Move> moves = getMoves(level);
 		
 		if(moves.size() <= 4)
 			return moves;

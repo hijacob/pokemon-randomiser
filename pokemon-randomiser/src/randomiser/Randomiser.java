@@ -3,7 +3,13 @@ package randomiser;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+
+import data.LevelUpMove;
+import data.Move;
+import data.Pokemon;
 
 import ec.util.MersenneTwister;
 
@@ -20,7 +26,7 @@ public abstract class Randomiser {
 	
 	public enum randomiseMode{OneToOne, Random, Mew};
 	public enum startersMode{Default, Random, Custom};
-	public enum movesetsMode{Unchanged, Random, Default};
+	public enum movesetsMode{Unchanged, Random, Default, RandomLegal};
 	public enum version{Unknown,
 		Red,Blue,Yellow,
 		Gold,Silver,Crystal,
@@ -88,6 +94,30 @@ public abstract class Randomiser {
 		outstream.close();
 	}
 	
+	protected List<Move> getTrainerMoves(movesetsMode mode, int pokemon, int level){
+		List<LevelUpMove> moveset = readPokemonMoves(pokemon);
+		Pokemon tmpPokemon = new Pokemon(pokemon);
+		tmpPokemon.levelupMoves = moveset;
+		
+		if(mode == movesetsMode.Default){
+			return tmpPokemon.getDefaultMoves(level);
+		}
+		
+		List<Move> possibleMoves = tmpPokemon.getMoves(level);
+		
+		if(mode == movesetsMode.RandomLegal){
+			List<Move> moves = new ArrayList<Move>();
+			for(int i=0; i<4; i++)
+				if(!possibleMoves.isEmpty())
+					moves.add(possibleMoves.remove(rand.nextInt(possibleMoves.size())));
+			return moves;
+		}
+		
+		return new ArrayList<Move>();
+	}
+	
+	protected abstract List<LevelUpMove> readPokemonMoves(int pokemon);
+
 	public void randomiseWildPokemon(boolean val){
 		wild = val;
 	}
