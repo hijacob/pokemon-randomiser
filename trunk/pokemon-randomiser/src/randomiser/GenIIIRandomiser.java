@@ -404,15 +404,11 @@ public class GenIIIRandomiser extends Randomiser {
 				if(trainerMovesets == movesetsMode.Random)
 					for(int j=0; j<4; j++)
 						writeShort(offset+16*i+2*j+8, getRandomMove());
-				else if(trainerMovesets == movesetsMode.Default){
-					List<LevelUpMove> moveset = readPokemonMoves(pkmn);
-					Pokemon tmpPokemon = new Pokemon(pkmn);
-					tmpPokemon.levelupMoves = moveset;
-					List<Move> trainerMoves = tmpPokemon.getDefaultMoves(level);
-					
+				else if(trainerMovesets != movesetsMode.Unchanged){
+					List<Move> moveset = getTrainerMoves(trainerMovesets, pkmn, level);
 					for(int j=0; j<4; j++)
-						if(j < trainerMoves.size())
-							writeShort(offset+16*i+2*j+8,(short) trainerMoves.get(j).index);
+						if(j < moveset.size())
+							writeShort(offset+16*i+2*j+8,(short) moveset.get(j).index);
 						else
 							writeShort(offset+16*i+2*j+8, (short) 0);
 				}
